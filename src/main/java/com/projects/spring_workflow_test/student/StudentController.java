@@ -38,6 +38,20 @@ public class StudentController {
 		return studentService.getAllStudents();
 	}
 
+	@GetMapping("/{id}")
+	@Operation(summary = "Find a student by ID", description = "Returns the student with the specified ID.")
+	public StudentResponse getStudentById(
+			@Parameter(description = "ID of the student to find") @PathVariable Long id) {
+		return studentService.getStudentById(id);
+	}
+
+	@GetMapping("/name/{name}")
+	@Operation(summary = "Find a student by name", description = "Finds a student by their name.")
+	public StudentResponse getStudentByName(
+			@Parameter(description = "Student name") @PathVariable String name) {
+		return studentService.getStudentByName(name);
+	}
+
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	@Operation(summary = "Add a student", description = "Creates a student using the supplied name and unique email address.")

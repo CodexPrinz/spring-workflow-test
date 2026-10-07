@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.HtmlUtils;
 
 @Service
 public class StudentService {
@@ -28,13 +29,29 @@ public class StudentService {
 				.toList());
 	}
 
+	@Transactional(readOnly = true)
+	public StudentResponse getStudentById(Long id) {
+		return timed("getStudentById", () -> toResponse(findStudent(id)));
+	}
+
+	@Transactional(readOnly = true)
+	public StudentResponse getStudentByName(String name) {
+		return timed("getStudentByName", () -> {
+			String safeName = sanitize(name);
+			Student student = studentRepository.findByName(safeName)
+					.orElseThrow(() -> new StudentNotFoundException(safeName));
+			return toResponse(student);
+		});
+	}
+
 	@Transactional
 	public StudentResponse addStudent(StudentRequest request) {
 		return timed("addStudent", () -> {
-			if (studentRepository.existsByEmail(request.email())) {
-				throw new StudentEmailAlreadyExistsException(request.email());
+			String sanitizedEmail = sanitize(request.email());
+			if (studentRepository.existsByEmail(sanitizedEmail)) {
+				throw new StudentEmailAlreadyExistsException(sanitizedEmail);
 			}
-			return toResponse(studentRepository.save(new Student(request.name(), request.email())));
+			return toResponse(studentRepository.save(new Student(sanitize(request.name()), sanitizedEmail)));
 		});
 	}
 
@@ -42,10 +59,11 @@ public class StudentService {
 	public StudentResponse editStudent(Long id, StudentRequest request) {
 		return timed("editStudent", () -> {
 			Student student = findStudent(id);
-			if (studentRepository.existsByEmailAndIdNot(request.email(), id)) {
-				throw new StudentEmailAlreadyExistsException(request.email());
+			String sanitizedEmail = sanitize(request.email());
+			if (studentRepository.existsByEmailAndIdNot(sanitizedEmail, id)) {
+				throw new StudentEmailAlreadyExistsException(sanitizedEmail);
 			}
-			student.update(request.name(), request.email());
+			student.update(sanitize(request.name()), sanitizedEmail);
 			return toResponse(studentRepository.save(student));
 		});
 	}
@@ -64,7 +82,21 @@ public class StudentService {
 
 	private StudentResponse toResponse(Student student) {
 		return new StudentResponse(
-				student.getId(), student.getName(), student.getEmail(), student.getCreatedAt(), student.getUpdatedAt());
+				student.getId(), sanitize(student.getName()), sanitize(student.getEmail()),
+				student.getCreatedAt(), student.getUpdatedAt());
+	}
+
+	private String sanitize(String value) {
+		if (value == null) {
+			return null;
+		}
+
+		String sanitized = value;
+		for (int i = 0; i < 2; i++) {
+			sanitized = HtmlUtils.htmlUnescape(sanitized);
+			sanitized = sanitized.replaceAll("(?is)<[^>]*>", "");
+		}
+		return sanitized.trim();
 	}
 
 	private <T> T timed(String operation, Supplier<T> action) {

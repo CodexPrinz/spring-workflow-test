@@ -40,6 +40,28 @@ class StudentControllerTest {
 	}
 
 	@Test
+	void delegatesFindingByIdToService() {
+		StudentResponse expected = new StudentResponse(
+				1L, "Ada", "ada@example.com", Instant.EPOCH, Instant.EPOCH);
+		when(studentService.getStudentById(1L)).thenReturn(expected);
+
+		assertEquals(expected, studentController.getStudentById(1L));
+
+		verify(studentService).getStudentById(1L);
+	}
+
+	@Test
+	void delegatesFindingByNameToService() {
+		StudentResponse expected = new StudentResponse(
+				1L, "Ada", "ada@example.com", Instant.EPOCH, Instant.EPOCH);
+		when(studentService.getStudentByName("Ada")).thenReturn(expected);
+
+		assertEquals(expected, studentController.getStudentByName("Ada"));
+
+		verify(studentService).getStudentByName("Ada");
+	}
+
+	@Test
 	void delegatesAddingToServiceAndReturnsResponse() {
 		StudentRequest request = new StudentRequest("Ada", "ada@example.com");
 		StudentResponse expected = new StudentResponse(

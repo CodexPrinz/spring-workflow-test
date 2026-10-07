@@ -48,6 +48,45 @@ class StudentServiceTest {
 	}
 
 	@Test
+	void findsStudentById() {
+		when(studentRepository.findById(7L)).thenReturn(Optional.of(new Student("Ada", "ada@example.com")));
+
+		StudentResponse result = studentService.getStudentById(7L);
+
+		assertEquals("Ada", result.name());
+		assertEquals("ada@example.com", result.email());
+	}
+
+	@Test
+	void findsStudentByUsername() {
+		when(studentRepository.findByName("Ada")).thenReturn(Optional.of(new Student("Ada", "ada@example.com")));
+
+		StudentResponse result = studentService.getStudentByName("Ada");
+
+		assertEquals("Ada", result.name());
+		assertEquals("ada@example.com", result.email());
+		verify(studentRepository).findByName("Ada");
+	}
+
+	@Test
+	void throwsWhenStudentUsernameDoesNotExist() {
+		when(studentRepository.findByName("Ada")).thenReturn(Optional.empty());
+
+		assertThrows(StudentNotFoundException.class, () -> studentService.getStudentByName("Ada"));
+	}
+
+	@Test
+	void stripsHtmlMarkupFromStudentNames() {
+		StudentRequest request = new StudentRequest("<script>alert(1)</script>Ada", "ada@example.com");
+		when(studentRepository.existsByEmail(request.email())).thenReturn(false);
+		when(studentRepository.save(any(Student.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+		StudentResponse result = studentService.addStudent(request);
+
+		assertEquals("alert(1)Ada", result.name());
+	}
+
+	@Test
 	void addsStudentWhenEmailIsAvailable() {
 		StudentRequest request = new StudentRequest("Ada", "ada@example.com");
 		when(studentRepository.existsByEmail(request.email())).thenReturn(false);
