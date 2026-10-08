@@ -34,3 +34,5 @@ build/
 
 ### Intellij
 .idea/
+
+.env
