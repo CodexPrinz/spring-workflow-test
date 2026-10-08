@@ -16,6 +16,8 @@ Formatted SQL statements and bound JDBC parameter values are logged. Student ser
 
 Swagger UI is available at `/swagger-ui/index.html`, and the OpenAPI specification is available at `/v3/api-docs`. Each student endpoint includes a brief description in the generated API documentation.
 
+The student directory is available at `/` when the Spring Boot application is running. It provides a green-themed interface for listing, searching, adding, editing, and deleting student records.
+
 ## Endpoints
 
 | Method | Path | Description |
