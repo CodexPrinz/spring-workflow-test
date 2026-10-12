@@ -36,3 +36,6 @@ build/
 .idea/
 
 .env
+
+.github/copilot.instructions.md
+.github/prompts/ci/ci.instructions.md
