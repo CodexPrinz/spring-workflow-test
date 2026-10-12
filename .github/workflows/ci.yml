@@ -36,17 +36,6 @@ jobs:
             exit "$status"
           fi
 
-      - name: Run unit tests
-        run: |
-          echo "::notice::Starting unit test stage"
-          if ./mvnw --batch-mode --no-transfer-progress test; then
-            echo "::notice::Unit test stage succeeded"
-          else
-            status=$?
-            echo "::error title=Unit tests failed::Unit test stage failed with exit code ${status}"
-            exit "$status"
-          fi
-
       - name: Build package
         run: |
           echo "::notice::Starting package stage"
@@ -55,5 +44,30 @@ jobs:
           else
             status=$?
             echo "::error title=Package failed::Package stage failed with exit code ${status}"
+            exit "$status"
+          fi
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Run unit tests
+        run: |
+          echo "::notice::Starting unit test stage"
+          if ./mvnw --batch-mode --no-transfer-progress clean test; then
+            echo "::notice::Unit test stage succeeded"
+          else
+            status=$?
+            echo "::error title=Unit tests failed::Unit test stage failed with exit code ${status}"
             exit "$status"
           fi
