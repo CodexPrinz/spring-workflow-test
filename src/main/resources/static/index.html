@@ -56,6 +56,16 @@
 						<span>Email address</span>
 						<input id="email-input" name="email" type="email" autocomplete="email" maxlength="255" required>
 					</label>
+					<label>
+						<span>Date of birth</span>
+						<input id="date-of-birth-input" name="dateOfBirth" type="date" required>
+					</label>
+					<label>
+						<span>Nationality</span>
+						<input id="nationality-input" name="nationality" type="text" list="nationality-options"
+							autocomplete="country-name" placeholder="Type to search countries..." maxlength="100" required>
+						<datalist id="nationality-options"></datalist>
+					</label>
 				</div>
 				<p class="form-error" id="form-error" role="alert" hidden></p>
 				<div class="form-actions">
@@ -84,6 +94,8 @@
 						<tr>
 							<th scope="col">STUDENT</th>
 							<th scope="col">EMAIL ADDRESS</th>
+							<th scope="col">DATE OF BIRTH</th>
+							<th scope="col">NATIONALITY</th>
 							<th scope="col">DATE ADDED</th>
 							<th scope="col"><span class="visually-hidden">Actions</span></th>
 						</tr>

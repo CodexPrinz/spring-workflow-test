@@ -5,6 +5,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 import com.projects.spring_workflow_test.student.dto.StudentRequest;
@@ -31,7 +32,8 @@ class StudentControllerTest {
 	@Test
 	void delegatesListingToService() {
 		List<StudentResponse> expected = List.of(new StudentResponse(
-				1L, "Ada", "ada@example.com", Instant.EPOCH, Instant.EPOCH));
+				1L, "Ada", "ada@example.com", LocalDate.of(1815, 12, 10), "British",
+				Instant.EPOCH, Instant.EPOCH));
 		when(studentService.getAllStudents()).thenReturn(expected);
 
 		assertEquals(expected, studentController.getAllStudents());
@@ -42,7 +44,8 @@ class StudentControllerTest {
 	@Test
 	void delegatesFindingByIdToService() {
 		StudentResponse expected = new StudentResponse(
-				1L, "Ada", "ada@example.com", Instant.EPOCH, Instant.EPOCH);
+				1L, "Ada", "ada@example.com", LocalDate.of(1815, 12, 10), "British",
+				Instant.EPOCH, Instant.EPOCH);
 		when(studentService.getStudentById(1L)).thenReturn(expected);
 
 		assertEquals(expected, studentController.getStudentById(1L));
@@ -53,7 +56,8 @@ class StudentControllerTest {
 	@Test
 	void delegatesFindingByNameToService() {
 		StudentResponse expected = new StudentResponse(
-				1L, "Ada", "ada@example.com", Instant.EPOCH, Instant.EPOCH);
+				1L, "Ada", "ada@example.com", LocalDate.of(1815, 12, 10), "British",
+				Instant.EPOCH, Instant.EPOCH);
 		when(studentService.getStudentByName("Ada")).thenReturn(expected);
 
 		assertEquals(expected, studentController.getStudentByName("Ada"));
@@ -63,9 +67,10 @@ class StudentControllerTest {
 
 	@Test
 	void delegatesAddingToServiceAndReturnsResponse() {
-		StudentRequest request = new StudentRequest("Ada", "ada@example.com");
+		StudentRequest request = new StudentRequest("Ada", "ada@example.com", LocalDate.of(1815, 12, 10), "British");
 		StudentResponse expected = new StudentResponse(
-				1L, "Ada", "ada@example.com", Instant.EPOCH, Instant.EPOCH);
+				1L, "Ada", "ada@example.com", request.dateOfBirth(), request.nationality(),
+				Instant.EPOCH, Instant.EPOCH);
 		when(studentService.addStudent(request)).thenReturn(expected);
 
 		assertEquals(expected, studentController.addStudent(request));
@@ -75,9 +80,10 @@ class StudentControllerTest {
 
 	@Test
 	void delegatesEditingToServiceAndReturnsResponse() {
-		StudentRequest request = new StudentRequest("Ada", "ada@example.com");
+		StudentRequest request = new StudentRequest("Ada", "ada@example.com", LocalDate.of(1815, 12, 10), "British");
 		StudentResponse expected = new StudentResponse(
-				1L, "Ada", "ada@example.com", Instant.EPOCH, Instant.EPOCH);
+				1L, "Ada", "ada@example.com", request.dateOfBirth(), request.nationality(),
+				Instant.EPOCH, Instant.EPOCH);
 		when(studentService.editStudent(1L, request)).thenReturn(expected);
 
 		assertEquals(expected, studentController.editStudent(1L, request));

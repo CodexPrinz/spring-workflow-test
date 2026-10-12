@@ -1,6 +1,7 @@
 package com.projects.spring_workflow_test.student;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,6 +25,12 @@ public class Student {
 	@Column(nullable = false, unique = true)
 	private String email;
 
+	@Column(name = "date_of_birth")
+	private LocalDate dateOfBirth;
+
+	@Column(length = 100)
+	private String nationality;
+
 	@Column(nullable = false, updatable = false)
 	private Instant createdAt;
 
@@ -33,9 +40,11 @@ public class Student {
 	protected Student() {
 	}
 
-	public Student(String name, String email) {
+	public Student(String name, String email, LocalDate dateOfBirth, String nationality) {
 		this.name = name;
 		this.email = email;
+		this.dateOfBirth = dateOfBirth;
+		this.nationality = nationality;
 		this.createdAt = Instant.now();
 		this.updatedAt = createdAt;
 	}
@@ -52,6 +61,14 @@ public class Student {
 		return email;
 	}
 
+	public LocalDate getDateOfBirth() {
+		return dateOfBirth;
+	}
+
+	public String getNationality() {
+		return nationality;
+	}
+
 	public Instant getCreatedAt() {
 		return createdAt;
 	}
@@ -60,9 +77,11 @@ public class Student {
 		return updatedAt;
 	}
 
-	public void update(String name, String email) {
+	public void update(String name, String email, LocalDate dateOfBirth, String nationality) {
 		this.name = name;
 		this.email = email;
+		this.dateOfBirth = dateOfBirth;
+		this.nationality = nationality;
 		this.updatedAt = Instant.now();
 	}
 

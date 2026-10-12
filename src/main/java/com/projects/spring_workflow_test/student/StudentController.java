@@ -54,13 +54,13 @@ public class StudentController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	@Operation(summary = "Add a student", description = "Creates a student using the supplied name and unique email address.")
+	@Operation(summary = "Add a student", description = "Creates a student using the supplied name, unique email address, date of birth, and nationality.")
 	public StudentResponse addStudent(@Valid @RequestBody StudentRequest request) {
 		return studentService.addStudent(request);
 	}
 
 	@PutMapping("/{id}")
-	@Operation(summary = "Edit a student", description = "Updates a student's name and email address. The email must be unique.")
+	@Operation(summary = "Edit a student", description = "Updates a student's name, email address, date of birth, and nationality. The email must be unique.")
 	public StudentResponse editStudent(
 			@Parameter(description = "ID of the student to update") @PathVariable Long id,
 			@Valid @RequestBody StudentRequest request) {

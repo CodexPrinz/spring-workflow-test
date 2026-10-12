@@ -51,7 +51,8 @@ public class StudentService {
 			if (studentRepository.existsByEmail(sanitizedEmail)) {
 				throw new StudentEmailAlreadyExistsException(sanitizedEmail);
 			}
-			return toResponse(studentRepository.save(new Student(sanitize(request.name()), sanitizedEmail)));
+			return toResponse(studentRepository.save(new Student(
+					sanitize(request.name()), sanitizedEmail, request.dateOfBirth(), sanitize(request.nationality()))));
 		});
 	}
 
@@ -63,7 +64,8 @@ public class StudentService {
 			if (studentRepository.existsByEmailAndIdNot(sanitizedEmail, id)) {
 				throw new StudentEmailAlreadyExistsException(sanitizedEmail);
 			}
-			student.update(sanitize(request.name()), sanitizedEmail);
+			student.update(sanitize(request.name()), sanitizedEmail, request.dateOfBirth(),
+					sanitize(request.nationality()));
 			return toResponse(studentRepository.save(student));
 		});
 	}
@@ -83,6 +85,7 @@ public class StudentService {
 	private StudentResponse toResponse(Student student) {
 		return new StudentResponse(
 				student.getId(), sanitize(student.getName()), sanitize(student.getEmail()),
+				student.getDateOfBirth(), sanitize(student.getNationality()),
 				student.getCreatedAt(), student.getUpdatedAt());
 	}
 

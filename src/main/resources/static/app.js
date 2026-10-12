@@ -11,10 +11,67 @@ const formTitle = document.querySelector("#form-title");
 const formError = document.querySelector("#form-error");
 const nameInput = document.querySelector("#name-input");
 const emailInput = document.querySelector("#email-input");
+const dateOfBirthInput = document.querySelector("#date-of-birth-input");
+const nationalityInput = document.querySelector("#nationality-input");
+const nationalityOptions = document.querySelector("#nationality-options");
 const saveButton = document.querySelector("#save-button");
+
+const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
+const countryCodes = [
+	"AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ",
+	"BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ",
+	"CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ",
+	"DE DJ DK DM DO DZ",
+	"EC EE EG EH ER ES ET FI FJ FK FM FO FR",
+	"GA GB GD GE GF GG GI GL GM GN GP GQ GR GS GT GU GW GY",
+	"HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT",
+	"JE JM JO JP",
+	"KE KG KH KI KM KN KP KR KW KY KZ",
+	"LA LB LC LI LK LR LS LT LU LV LY",
+	"MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ",
+	"NA NC NE NF NG NI NL NO NP NR NU NZ",
+	"OM",
+	"PA PE PF PG PH PK PL PM PN PR PS PT PW PY",
+	"QA",
+	"RE RO RS RU RW",
+	"SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ",
+	"TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ",
+	"UA UG UM US UY UZ",
+	"VA VC VE VG VI VN VU",
+	"WF WS",
+	"YE YT",
+	"ZA ZM ZW"
+].join(" ").split(" ").map((code) => regionNames.of(code));
+const countryNames = [...new Set(countryCodes)].sort((a, b) => a.localeCompare(b, "en"));
+const countryNamesByLowerCase = new Map(countryNames.map((country) => [country.toLocaleLowerCase(), country]));
 
 let students = [];
 let editingStudentId = null;
+
+for (const country of countryNames) {
+	const option = document.createElement("option");
+	option.value = country;
+	nationalityOptions.append(option);
+}
+
+function localDateString(date) {
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, "0");
+	const day = String(date.getDate()).padStart(2, "0");
+	return `${year}-${month}-${day}`;
+}
+
+function validateNationality() {
+	const country = countryNamesByLowerCase.get(nationalityInput.value.trim().toLocaleLowerCase());
+	nationalityInput.setCustomValidity(country ? "" : "Choose a country from the suggestions.");
+	if (country) {
+		nationalityInput.value = country;
+	}
+}
+
+dateOfBirthInput.max = localDateString(new Date());
+nationalityInput.addEventListener("input", validateNationality);
+nationalityInput.addEventListener("change", validateNationality);
 
 function showNotice(message, isError = false) {
 	notice.textContent = message;
@@ -69,7 +126,7 @@ function initials(name) {
 }
 
 function formatDate(value) {
-	const date = new Date(value);
+	const date = new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00:00` : value);
 	if (Number.isNaN(date.getTime())) {
 		return "—";
 	}
@@ -93,7 +150,7 @@ function createActionButton(label, student, action, extraClass = "") {
 function renderStudents() {
 	const query = searchInput.value.trim().toLocaleLowerCase();
 	const visibleStudents = students.filter((student) =>
-		`${student.name} ${student.email}`.toLocaleLowerCase().includes(query)
+		`${student.name} ${student.email} ${student.nationality ?? ""}`.toLocaleLowerCase().includes(query)
 	);
 
 	studentList.replaceChildren();
@@ -104,6 +161,8 @@ function renderStudents() {
 		const avatar = document.createElement("span");
 		const name = document.createElement("span");
 		const emailCell = document.createElement("td");
+		const dateOfBirthCell = document.createElement("td");
+		const nationalityCell = document.createElement("td");
 		const dateCell = document.createElement("td");
 		const actionsCell = document.createElement("td");
 		const actions = document.createElement("div");
@@ -117,6 +176,8 @@ function renderStudents() {
 		studentCell.append(studentIdentity);
 
 		emailCell.textContent = student.email;
+		dateOfBirthCell.textContent = student.dateOfBirth ? formatDate(student.dateOfBirth) : "—";
+		nationalityCell.textContent = student.nationality ?? "—";
 		dateCell.className = "date-cell";
 		dateCell.textContent = formatDate(student.createdAt);
 		actions.className = "row-actions";
@@ -125,7 +186,7 @@ function renderStudents() {
 			createActionButton("Delete", student, deleteStudent, "delete")
 		);
 		actionsCell.append(actions);
-		row.append(studentCell, emailCell, dateCell, actionsCell);
+		row.append(studentCell, emailCell, dateOfBirthCell, nationalityCell, dateCell, actionsCell);
 		studentList.append(row);
 	}
 
@@ -165,6 +226,9 @@ function openForm(student = null) {
 	saveButton.textContent = student ? "Save changes" : "Save student";
 	nameInput.value = student?.name ?? "";
 	emailInput.value = student?.email ?? "";
+	dateOfBirthInput.value = student?.dateOfBirth ?? "";
+	nationalityInput.value = student?.nationality ?? "";
+	validateNationality();
 	formPanel.hidden = false;
 	formPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
 	nameInput.focus();
@@ -187,7 +251,9 @@ async function saveStudent(event) {
 	saveButton.disabled = true;
 	const payload = {
 		name: nameInput.value.trim(),
-		email: emailInput.value.trim()
+		email: emailInput.value.trim(),
+		dateOfBirth: dateOfBirthInput.value,
+		nationality: nationalityInput.value.trim()
 	};
 	const isEditing = editingStudentId !== null;
 	const path = isEditing ? `${apiUrl}/${encodeURIComponent(editingStudentId)}` : apiUrl;
